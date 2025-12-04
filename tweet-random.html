@@ -4,24 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>跳转中...</title>
-    <script>
-        // 固定附加内容（与工具保持一致）
-        const fixedContent = '\n\nFILM RACHA X SRICHAND #SRICHANDHausBase #filmracha';
-        // 从URL参数中获取文案列表并解析
-        const urlParams = new URLSearchParams(window.location.search);
-        const encodedTexts = urlParams.get('texts');
-        if (!encodedTexts) {
-            alert('文案列表为空！');
-            return;
-        }
-        const textArray = JSON.parse(decodeURIComponent(encodedTexts));
-        // 随机选择文案并跳转X推文编辑页
-        const randomText = textArray[Math.floor(Math.random() * textArray.length)];
-        const fullText = randomText + fixedContent;
-        window.location.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullText)}`;
-    </script>
+    <!-- 增加GitHub Pages兼容头信息 -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        .loading { color: #14171a; font-size: 18px; margin-bottom: 20px; }
+        .error { color: #e0245e; font-size: 16px; margin-top: 10px; }
+        .btn { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #1da1f2; color: white; text-decoration: none; border-radius: 5px; }
+    </style>
 </head>
 <body>
-    跳转中...（将自动打开推文编辑页）
+    <div class="loading">正在跳转X推文编辑页...</div>
+    <div id="error" class="error"></div>
+    <a id="manualBtn" class="btn" style="display: none;" href="#">点击手动跳转</a>
+
+    <!-- 把JS放到body末尾，确保DOM加载完成后执行 -->
+    <script>
+        // 兼容GitHub Pages的跳转逻辑
+        (function() {
+            // 固定内容
+            const fixedContent = '\n\nFILM RACHA X SRICHAND #SRICHANDHausBase #filmracha';
+            let errorEl = document.getElementById('error');
+            let manualBtn = document.getElementById('manualBtn');
+
+            // 解析URL参数（兼容GitHub Pages的URL解析）
+            function getUrlParam(name) {
+                let search = window.location.search.substring(1);
+                let params = search.split('&');
+                for (let i = 0; i < params.length; i++) {
+                    let pair = params[i].split('=');
+                    if (pair[0] === name) {
+                        return decodeURIComponent(pair[1] || '');
+                    }
+                }
+                return '';
+            }
+
+            try {
+                // 1. 获取并解析文案列表
+                let encodedTexts = getUrlParam('texts');
+                if (!encodedTexts) {
+                    throw new Error('未检测到文案列表，请检查链接是否完整');
+                }
+
+                let textArray = JSON.parse(encodedTexts);
+                if (!Array.isArray(textArray) || textArray.length === 0) {
+                    throw new Error('文案列表为空或格式错误');
+                }
+
+                // 2. 随机选文案+拼接固定内容
+                let randomText = textArray[Math.floor(Math.random() * textArray.length)];
+                let fullText = randomText + fixedContent;
+
+                // 3. 编码并跳转（兼容X平台）
+                let finalText = encodeURIComponent(fullText)
+                    .replace(/%20/g, '+')
+                    .replace(/%0A/g, '%0D%0A');
+                let tweetUrl = `https://twitter.com/intent/tweet?text=${finalText}`;
+
+                // 自动跳转
+                window.location.href = tweetUrl;
+
+                // 备用手动跳转
+                manualBtn.href = tweetUrl;
+                manualBtn.style.display = 'inline-block';
+
+            } catch (err) {
+                errorEl.textContent = '跳转失败：' + err.message;
+                manualBtn.style.display = 'inline-block';
+                manualBtn.onclick = function() {
+                    alert('请检查生成的链接是否正确，或联系工具开发者');
+                };
+                console.error('错误详情：', err);
+            }
+        })();
+    </script>
 </body>
 </html>
