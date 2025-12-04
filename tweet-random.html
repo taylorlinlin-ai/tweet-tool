@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跳转中...</title>
+    <script>
+        // 固定附加内容（与工具保持一致）
+        const fixedContent = '\n\nFILM RACHA X SRICHAND #SRICHANDHausBase #filmracha';
+        // 从URL参数中获取文案列表并解析
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedTexts = urlParams.get('texts');
+        if (!encodedTexts) {
+            alert('文案列表为空！');
+            return;
+        }
+        const textArray = JSON.parse(decodeURIComponent(encodedTexts));
+        // 随机选择文案并跳转X推文编辑页
+        const randomText = textArray[Math.floor(Math.random() * textArray.length)];
+        const fullText = randomText + fixedContent;
+        window.location.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullText)}`;
+    </script>
+</head>
+<body>
+    跳转中...（将自动打开推文编辑页）
+</body>
+</html>
